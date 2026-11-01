@@ -1,4 +1,5 @@
 ﻿
+
 using System;
 using System.Collections.Generic;
 
@@ -18,12 +19,45 @@ namespace BibliotecaEscolar
             PrestamosHistoricos = prestamosHistoricos;
             Ejemplares = ejemplares;
         }
+
+        // Contar los ejemplares disponibles
+        public int ContarDisponibles()
+        {
+            int disponibles = 0;
+
+            foreach (string ejemplar in Ejemplares)
+            {
+                if (ejemplar == "Disponible")
+                {
+                    disponibles++;
+                }
+            }
+
+            return disponibles;
+        }
+
+        // Registrar un préstamo
+        public bool RegistrarPrestamo()
+        {
+            for (int i = 0; i < Ejemplares.Count; i++)
+            {
+                if (Ejemplares[i] == "Disponible")
+                {
+                    Ejemplares[i] = "Prestado";
+                    PrestamosHistoricos++;
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     class Program
     {
         static void Main(string[] args)
         {
+            // Catálogo con ocho títulos y sus ejemplares
             List<Titulo> catalogo = new List<Titulo>
             {
                 new Titulo("Cien años de soledad", "9780307474728", 25,
@@ -51,29 +85,62 @@ namespace BibliotecaEscolar
                     new List<string> { "Disponible", "Prestado" })
             };
 
-            Console.WriteLine("===== BIBLIOTECA ESCOLAR =====\n");
+            // Mostrar el catálogo antes de los préstamos
+            Console.WriteLine("===== CATALOGO ANTES DE LOS PRESTAMOS =====\n");
 
             foreach (Titulo titulo in catalogo)
             {
-                int disponibles = 0;
-
-                foreach (string ejemplar in titulo.Ejemplares)
-                {
-                    if (ejemplar == "Disponible")
-                    {
-                        disponibles++;
-                    }
-                }
-
-                Console.WriteLine("Título: " + titulo.Nombre);
+                Console.WriteLine("Titulo: " + titulo.Nombre);
                 Console.WriteLine("ISBN: " + titulo.ISBN);
-                Console.WriteLine("Préstamos históricos: " + titulo.PrestamosHistoricos);
-                Console.WriteLine("Total de ejemplares: " + titulo.Ejemplares.Count);
-                Console.WriteLine("Disponibles: " + disponibles);
-                Console.WriteLine("--------------------------------");
+                Console.WriteLine("Ejemplares totales: " + titulo.Ejemplares.Count);
+                Console.WriteLine("Disponibles: " + titulo.ContarDisponibles());
+                Console.WriteLine("Prestamos historicos: " + titulo.PrestamosHistoricos);
+                Console.WriteLine("-------------------------------------------");
             }
 
-            Console.WriteLine("\nTotal de títulos: " + catalogo.Count);
+            // Seleccionar tres títulos para simular préstamos
+            Console.WriteLine("\n===== REGISTRO DE TRES PRESTAMOS =====\n");
+
+            Titulo libro1 = catalogo[0];
+            Titulo libro2 = catalogo[2];
+            Titulo libro3 = catalogo[6];
+
+            // Primer préstamo
+            Console.WriteLine(
+                libro1.Nombre + ": " +
+                (libro1.RegistrarPrestamo()
+                    ? "Prestamo registrado"
+                    : "No hay ejemplares disponibles")
+            );
+
+            // Segundo préstamo
+            Console.WriteLine(
+                libro2.Nombre + ": " +
+                (libro2.RegistrarPrestamo()
+                    ? "Prestamo registrado"
+                    : "No hay ejemplares disponibles")
+            );
+
+            // Tercer préstamo
+            Console.WriteLine(
+                libro3.Nombre + ": " +
+                (libro3.RegistrarPrestamo()
+                    ? "Prestamo registrado"
+                    : "No hay ejemplares disponibles")
+            );
+
+            // Mostrar el catálogo después de los préstamos
+            Console.WriteLine("\n===== CATALOGO DESPUES DE LOS PRESTAMOS =====\n");
+
+            foreach (Titulo titulo in catalogo)
+            {
+                Console.WriteLine("Titulo: " + titulo.Nombre);
+                Console.WriteLine("ISBN: " + titulo.ISBN);
+                Console.WriteLine("Ejemplares totales: " + titulo.Ejemplares.Count);
+                Console.WriteLine("Disponibles: " + titulo.ContarDisponibles());
+                Console.WriteLine("Prestamos historicos: " + titulo.PrestamosHistoricos);
+                Console.WriteLine("-------------------------------------------");
+            }
 
             Console.WriteLine("\nPresiona una tecla para salir...");
             Console.ReadKey();
