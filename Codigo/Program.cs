@@ -1,5 +1,4 @@
 ﻿
-
 using System;
 using System.Collections.Generic;
 
@@ -55,6 +54,42 @@ namespace BibliotecaEscolar
 
     class Program
     {
+        // Ordenar por préstamos históricos de mayor a menor.
+        // En caso de empate, ordenar alfabéticamente.
+        static void OrdenarPorPrestamos(List<Titulo> catalogo)
+        {
+            for (int i = 1; i < catalogo.Count; i++)
+            {
+                Titulo actual = catalogo[i];
+                int j = i - 1;
+
+                while (j >= 0 &&
+                    (catalogo[j].PrestamosHistoricos < actual.PrestamosHistoricos ||
+                    (catalogo[j].PrestamosHistoricos == actual.PrestamosHistoricos &&
+                    string.Compare(catalogo[j].Nombre, actual.Nombre, StringComparison.OrdinalIgnoreCase) > 0)))
+                {
+                    catalogo[j + 1] = catalogo[j];
+                    j--;
+                }
+
+                catalogo[j + 1] = actual;
+            }
+        }
+
+        // Mostrar el catálogo
+        static void MostrarCatalogo(List<Titulo> catalogo)
+        {
+            foreach (Titulo titulo in catalogo)
+            {
+                Console.WriteLine("Titulo: " + titulo.Nombre);
+                Console.WriteLine("ISBN: " + titulo.ISBN);
+                Console.WriteLine("Ejemplares totales: " + titulo.Ejemplares.Count);
+                Console.WriteLine("Disponibles: " + titulo.ContarDisponibles());
+                Console.WriteLine("Prestamos historicos: " + titulo.PrestamosHistoricos);
+                Console.WriteLine("-------------------------------------------");
+            }
+        }
+
         static void Main(string[] args)
         {
             // Catálogo con ocho títulos y sus ejemplares
@@ -69,7 +104,7 @@ namespace BibliotecaEscolar
                 new Titulo("El principito", "9780156012195", 30,
                     new List<string> { "Disponible" }),
 
-                new Titulo("Harry Potter y la piedra filosofal", "9788478884452", 22,
+                new Titulo("Harry Potter y la piedra filosofal", "9788478884452", 20,
                     new List<string> { "Disponible", "Prestado", "Disponible", "Disponible" }),
 
                 new Titulo("La Odisea", "9788420634891", 12,
@@ -85,65 +120,42 @@ namespace BibliotecaEscolar
                     new List<string> { "Disponible", "Prestado" })
             };
 
-            // Mostrar el catálogo antes de los préstamos
+            // Mostrar catálogo antes de los préstamos
             Console.WriteLine("===== CATALOGO ANTES DE LOS PRESTAMOS =====\n");
+            MostrarCatalogo(catalogo);
 
-            foreach (Titulo titulo in catalogo)
-            {
-                Console.WriteLine("Titulo: " + titulo.Nombre);
-                Console.WriteLine("ISBN: " + titulo.ISBN);
-                Console.WriteLine("Ejemplares totales: " + titulo.Ejemplares.Count);
-                Console.WriteLine("Disponibles: " + titulo.ContarDisponibles());
-                Console.WriteLine("Prestamos historicos: " + titulo.PrestamosHistoricos);
-                Console.WriteLine("-------------------------------------------");
-            }
-
-            // Seleccionar tres títulos para simular préstamos
+            // Simular tres préstamos
             Console.WriteLine("\n===== REGISTRO DE TRES PRESTAMOS =====\n");
 
             Titulo libro1 = catalogo[0];
             Titulo libro2 = catalogo[2];
             Titulo libro3 = catalogo[6];
 
-            // Primer préstamo
             Console.WriteLine(
                 libro1.Nombre + ": " +
-                (libro1.RegistrarPrestamo()
-                    ? "Prestamo registrado"
-                    : "No hay ejemplares disponibles")
+                (libro1.RegistrarPrestamo() ? "Prestamo registrado" : "Sin ejemplares disponibles")
             );
 
-            // Segundo préstamo
             Console.WriteLine(
                 libro2.Nombre + ": " +
-                (libro2.RegistrarPrestamo()
-                    ? "Prestamo registrado"
-                    : "No hay ejemplares disponibles")
+                (libro2.RegistrarPrestamo() ? "Prestamo registrado" : "Sin ejemplares disponibles")
             );
 
-            // Tercer préstamo
             Console.WriteLine(
                 libro3.Nombre + ": " +
-                (libro3.RegistrarPrestamo()
-                    ? "Prestamo registrado"
-                    : "No hay ejemplares disponibles")
+                (libro3.RegistrarPrestamo() ? "Prestamo registrado" : "Sin ejemplares disponibles")
             );
 
-            // Mostrar el catálogo después de los préstamos
-            Console.WriteLine("\n===== CATALOGO DESPUES DE LOS PRESTAMOS =====\n");
+            // Ordenar el catálogo manualmente
+            OrdenarPorPrestamos(catalogo);
 
-            foreach (Titulo titulo in catalogo)
-            {
-                Console.WriteLine("Titulo: " + titulo.Nombre);
-                Console.WriteLine("ISBN: " + titulo.ISBN);
-                Console.WriteLine("Ejemplares totales: " + titulo.Ejemplares.Count);
-                Console.WriteLine("Disponibles: " + titulo.ContarDisponibles());
-                Console.WriteLine("Prestamos historicos: " + titulo.PrestamosHistoricos);
-                Console.WriteLine("-------------------------------------------");
-            }
+            // Mostrar el catálogo ordenado
+            Console.WriteLine("\n===== CATALOGO ORDENADO POR PRESTAMOS =====\n");
+            MostrarCatalogo(catalogo);
 
             Console.WriteLine("\nPresiona una tecla para salir...");
             Console.ReadKey();
         }
     }
 }
+
