@@ -11,7 +11,8 @@ namespace BibliotecaEscolar
         public int PrestamosHistoricos;
         public List<string> Ejemplares;
 
-        public Titulo(string nombre, string isbn, int prestamosHistoricos, List<string> ejemplares)
+        public Titulo(string nombre, string isbn, int prestamosHistoricos,
+            List<string> ejemplares)
         {
             Nombre = nombre;
             ISBN = isbn;
@@ -19,7 +20,6 @@ namespace BibliotecaEscolar
             Ejemplares = ejemplares;
         }
 
-        // Contar los ejemplares disponibles
         public int ContarDisponibles()
         {
             int disponibles = 0;
@@ -35,7 +35,6 @@ namespace BibliotecaEscolar
             return disponibles;
         }
 
-        // Registrar un préstamo
         public bool RegistrarPrestamo()
         {
             for (int i = 0; i < Ejemplares.Count; i++)
@@ -54,45 +53,8 @@ namespace BibliotecaEscolar
 
     class Program
     {
-        // Ordenar por préstamos históricos de mayor a menor.
-        // En caso de empate, ordenar alfabéticamente.
-        static void OrdenarPorPrestamos(List<Titulo> catalogo)
-        {
-            for (int i = 1; i < catalogo.Count; i++)
-            {
-                Titulo actual = catalogo[i];
-                int j = i - 1;
-
-                while (j >= 0 &&
-                    (catalogo[j].PrestamosHistoricos < actual.PrestamosHistoricos ||
-                    (catalogo[j].PrestamosHistoricos == actual.PrestamosHistoricos &&
-                    string.Compare(catalogo[j].Nombre, actual.Nombre, StringComparison.OrdinalIgnoreCase) > 0)))
-                {
-                    catalogo[j + 1] = catalogo[j];
-                    j--;
-                }
-
-                catalogo[j + 1] = actual;
-            }
-        }
-
-        // Mostrar el catálogo
-        static void MostrarCatalogo(List<Titulo> catalogo)
-        {
-            foreach (Titulo titulo in catalogo)
-            {
-                Console.WriteLine("Titulo: " + titulo.Nombre);
-                Console.WriteLine("ISBN: " + titulo.ISBN);
-                Console.WriteLine("Ejemplares totales: " + titulo.Ejemplares.Count);
-                Console.WriteLine("Disponibles: " + titulo.ContarDisponibles());
-                Console.WriteLine("Prestamos historicos: " + titulo.PrestamosHistoricos);
-                Console.WriteLine("-------------------------------------------");
-            }
-        }
-
         static void Main(string[] args)
         {
-            // Catálogo con ocho títulos y sus ejemplares
             List<Titulo> catalogo = new List<Titulo>
             {
                 new Titulo("Cien años de soledad", "9780307474728", 25,
@@ -120,42 +82,164 @@ namespace BibliotecaEscolar
                     new List<string> { "Disponible", "Prestado" })
             };
 
-            // Mostrar catálogo antes de los préstamos
-            Console.WriteLine("===== CATALOGO ANTES DE LOS PRESTAMOS =====\n");
-            MostrarCatalogo(catalogo);
+            // Registrar tres prestamos de prueba.
+            catalogo[0].RegistrarPrestamo();
+            catalogo[2].RegistrarPrestamo();
+            catalogo[6].RegistrarPrestamo();
 
-            // Simular tres préstamos
-            Console.WriteLine("\n===== REGISTRO DE TRES PRESTAMOS =====\n");
-
-            Titulo libro1 = catalogo[0];
-            Titulo libro2 = catalogo[2];
-            Titulo libro3 = catalogo[6];
-
-            Console.WriteLine(
-                libro1.Nombre + ": " +
-                (libro1.RegistrarPrestamo() ? "Prestamo registrado" : "Sin ejemplares disponibles")
-            );
-
-            Console.WriteLine(
-                libro2.Nombre + ": " +
-                (libro2.RegistrarPrestamo() ? "Prestamo registrado" : "Sin ejemplares disponibles")
-            );
-
-            Console.WriteLine(
-                libro3.Nombre + ": " +
-                (libro3.RegistrarPrestamo() ? "Prestamo registrado" : "Sin ejemplares disponibles")
-            );
-
-            // Ordenar el catálogo manualmente
+            // Ordenar el catalogo por prestamos historicos.
             OrdenarPorPrestamos(catalogo);
 
-            // Mostrar el catálogo ordenado
-            Console.WriteLine("\n===== CATALOGO ORDENADO POR PRESTAMOS =====\n");
-            MostrarCatalogo(catalogo);
+            Console.WriteLine("==================================");
+            Console.WriteLine("     BIBLIOTECA ESCOLAR");
+            Console.WriteLine("==================================");
 
-            Console.WriteLine("\nPresiona una tecla para salir...");
+            Console.WriteLine("\n1. BUSQUEDA SECUENCIAL POR TITULO");
+
+            BuscarPorTitulo(catalogo, "El principito");
+            BuscarPorTitulo(catalogo, "Libro inexistente");
+
+            Console.WriteLine("\n2. BUSQUEDA BINARIA POR ISBN");
+
+            BuscarPorISBN(catalogo, "9780307474728");
+            BuscarPorISBN(catalogo, "0000000000000");
+
+            Console.WriteLine("\nPresiona una tecla para salir.");
             Console.ReadKey();
+        }
+
+        // Ordenamiento por insercion:
+        // prestamos historicos de mayor a menor.
+        // Si hay empate, orden alfabetico por titulo.
+        static void OrdenarPorPrestamos(List<Titulo> catalogo)
+        {
+            for (int i = 1; i < catalogo.Count; i++)
+            {
+                Titulo actual = catalogo[i];
+                int j = i - 1;
+
+                while (j >= 0 &&
+                    (catalogo[j].PrestamosHistoricos <
+                     actual.PrestamosHistoricos ||
+                    (catalogo[j].PrestamosHistoricos ==
+                     actual.PrestamosHistoricos &&
+                     string.Compare(catalogo[j].Nombre,
+                     actual.Nombre,
+                     StringComparison.OrdinalIgnoreCase) > 0)))
+                {
+                    catalogo[j + 1] = catalogo[j];
+                    j--;
+                }
+
+                catalogo[j + 1] = actual;
+            }
+        }
+
+        // Busqueda secuencial por titulo.
+        static void BuscarPorTitulo(List<Titulo> catalogo, string nombre)
+        {
+            bool encontrado = false;
+
+            for (int i = 0; i < catalogo.Count; i++)
+            {
+                if (string.Equals(catalogo[i].Nombre, nombre,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("\nLibro encontrado:");
+                    MostrarInformacion(catalogo[i]);
+                    encontrado = true;
+                    break;
+                }
+            }
+
+            if (!encontrado)
+            {
+                Console.WriteLine("\nNo se encontro el titulo: " + nombre);
+            }
+        }
+
+        // Crea una copia del catalogo y la ordena por ISBN.
+        // El catalogo original conserva su orden por prestamos.
+        static List<Titulo> CrearCatalogoOrdenadoPorISBN(
+            List<Titulo> catalogo)
+        {
+            List<Titulo> copia = new List<Titulo>(catalogo);
+
+            // Ordenamiento por insercion usando ISBN.
+            for (int i = 1; i < copia.Count; i++)
+            {
+                Titulo actual = copia[i];
+                int j = i - 1;
+
+                while (j >= 0 &&
+                    string.Compare(copia[j].ISBN, actual.ISBN,
+                    StringComparison.Ordinal) > 0)
+                {
+                    copia[j + 1] = copia[j];
+                    j--;
+                }
+
+                copia[j + 1] = actual;
+            }
+
+            return copia;
+        }
+
+        // Busqueda binaria propia por ISBN.
+        static void BuscarPorISBN(List<Titulo> catalogo, string isbn)
+        {
+            List<Titulo> catalogoISBN =
+                CrearCatalogoOrdenadoPorISBN(catalogo);
+
+            int inicio = 0;
+            int fin = catalogoISBN.Count - 1;
+            bool encontrado = false;
+
+            while (inicio <= fin)
+            {
+                int medio = inicio + (fin - inicio) / 2;
+
+                int comparacion = string.Compare(
+                    catalogoISBN[medio].ISBN,
+                    isbn,
+                    StringComparison.Ordinal);
+
+                if (comparacion == 0)
+                {
+                    Console.WriteLine("\nISBN encontrado:");
+                    MostrarInformacion(catalogoISBN[medio]);
+                    encontrado = true;
+                    break;
+                }
+                else if (comparacion < 0)
+                {
+                    inicio = medio + 1;
+                }
+                else
+                {
+                    fin = medio - 1;
+                }
+            }
+
+            if (!encontrado)
+            {
+                Console.WriteLine("\nNo se encontro el ISBN: " + isbn);
+            }
+        }
+
+        // Muestra los datos del libro.
+        static void MostrarInformacion(Titulo titulo)
+        {
+            Console.WriteLine("Titulo: " + titulo.Nombre);
+            Console.WriteLine("ISBN: " + titulo.ISBN);
+            Console.WriteLine("Total de ejemplares: " +
+                titulo.Ejemplares.Count);
+            Console.WriteLine("Ejemplares disponibles: " +
+                titulo.ContarDisponibles());
+            Console.WriteLine("Prestamos historicos: " +
+                titulo.PrestamosHistoricos);
         }
     }
 }
+
 
