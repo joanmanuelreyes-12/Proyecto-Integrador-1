@@ -66,8 +66,10 @@ namespace BibliotecaEscolar
                 new Titulo("El principito", "9780156012195", 30,
                     new List<string> { "Disponible" }),
 
-                new Titulo("Harry Potter y la piedra filosofal", "9788478884452", 20,
-                    new List<string> { "Disponible", "Prestado", "Disponible", "Disponible" }),
+                new Titulo("Harry Potter y la piedra filosofal",
+                    "9788478884452", 20,
+                    new List<string> { "Disponible", "Prestado",
+                        "Disponible", "Disponible" }),
 
                 new Titulo("La Odisea", "9788420634891", 12,
                     new List<string> { "Prestado", "Disponible" }),
@@ -82,35 +84,88 @@ namespace BibliotecaEscolar
                     new List<string> { "Disponible", "Prestado" })
             };
 
-            // Registrar tres prestamos de prueba.
-            catalogo[0].RegistrarPrestamo();
-            catalogo[2].RegistrarPrestamo();
-            catalogo[6].RegistrarPrestamo();
-
-            // Ordenar el catalogo por prestamos historicos.
+            // Orden inicial del catalogo.
             OrdenarPorPrestamos(catalogo);
 
-            Console.WriteLine("==================================");
-            Console.WriteLine("     BIBLIOTECA ESCOLAR");
-            Console.WriteLine("==================================");
+            bool continuar = true;
 
-            Console.WriteLine("\n1. BUSQUEDA SECUENCIAL POR TITULO");
+            while (continuar)
+            {
+                Console.WriteLine("\n==================================");
+                Console.WriteLine("       BIBLIOTECA ESCOLAR");
+                Console.WriteLine("==================================");
+                Console.WriteLine("1. Mostrar catalogo");
+                Console.WriteLine("2. Buscar libro por titulo");
+                Console.WriteLine("3. Buscar libro por ISBN");
+                Console.WriteLine("4. Registrar prestamo");
+                Console.WriteLine("5. Salir");
+                Console.Write("\nSelecciona una opcion: ");
 
-            BuscarPorTitulo(catalogo, "El principito");
-            BuscarPorTitulo(catalogo, "Libro inexistente");
+                string opcion = Console.ReadLine();
 
-            Console.WriteLine("\n2. BUSQUEDA BINARIA POR ISBN");
+                switch (opcion)
+                {
+                    case "1":
+                        OrdenarPorPrestamos(catalogo);
+                        MostrarCatalogo(catalogo);
+                        break;
 
-            BuscarPorISBN(catalogo, "9780307474728");
-            BuscarPorISBN(catalogo, "0000000000000");
+                    case "2":
+                        Console.Write("\nEscribe el titulo del libro: ");
+                        string nombre = Console.ReadLine();
 
-            Console.WriteLine("\nPresiona una tecla para salir.");
-            Console.ReadKey();
+                        BuscarPorTitulo(catalogo, nombre);
+                        break;
+
+                    case "3":
+                        Console.Write("\nEscribe el ISBN del libro: ");
+                        string isbn = Console.ReadLine();
+
+                        BuscarPorISBN(catalogo, isbn);
+                        break;
+
+                    case "4":
+                        Console.Write("\nEscribe el titulo que deseas prestar: ");
+                        string tituloPrestamo = Console.ReadLine();
+
+                        Titulo libro = BuscarTitulo(catalogo, tituloPrestamo);
+
+                        if (libro == null)
+                        {
+                            Console.WriteLine("El libro no existe.");
+                        }
+                        else if (libro.RegistrarPrestamo())
+                        {
+                            Console.WriteLine("Prestamo registrado correctamente.");
+                            Console.WriteLine("Disponibles: " +
+                                libro.ContarDisponibles());
+                            Console.WriteLine("Prestamos historicos: " +
+                                libro.PrestamosHistoricos);
+
+                            OrdenarPorPrestamos(catalogo);
+                        }
+                        else
+                        {
+                            Console.WriteLine(
+                                "No hay ejemplares disponibles para prestar.");
+                        }
+
+                        break;
+
+                    case "5":
+                        continuar = false;
+                        Console.WriteLine("Hasta luego.");
+                        break;
+
+                    default:
+                        Console.WriteLine("Opcion no valida. Intenta de nuevo.");
+                        break;
+                }
+            }
         }
 
         // Ordenamiento por insercion:
-        // prestamos historicos de mayor a menor.
-        // Si hay empate, orden alfabetico por titulo.
+        // prestamos de mayor a menor y titulo alfabetico en empates.
         static void OrdenarPorPrestamos(List<Titulo> catalogo)
         {
             for (int i = 1; i < catalogo.Count; i++)
@@ -135,37 +190,54 @@ namespace BibliotecaEscolar
             }
         }
 
-        // Busqueda secuencial por titulo.
-        static void BuscarPorTitulo(List<Titulo> catalogo, string nombre)
+        // Muestra el catalogo ordenado.
+        static void MostrarCatalogo(List<Titulo> catalogo)
         {
-            bool encontrado = false;
+            Console.WriteLine("\n========== CATALOGO ==========");
 
-            for (int i = 0; i < catalogo.Count; i++)
+            foreach (Titulo titulo in catalogo)
             {
-                if (string.Equals(catalogo[i].Nombre, nombre,
-                    StringComparison.OrdinalIgnoreCase))
-                {
-                    Console.WriteLine("\nLibro encontrado:");
-                    MostrarInformacion(catalogo[i]);
-                    encontrado = true;
-                    break;
-                }
-            }
-
-            if (!encontrado)
-            {
-                Console.WriteLine("\nNo se encontro el titulo: " + nombre);
+                MostrarInformacion(titulo);
+                Console.WriteLine("------------------------------");
             }
         }
 
-        // Crea una copia del catalogo y la ordena por ISBN.
-        // El catalogo original conserva su orden por prestamos.
+        // Busca un titulo recorriendo la lista.
+        static Titulo BuscarTitulo(List<Titulo> catalogo, string nombre)
+        {
+            foreach (Titulo titulo in catalogo)
+            {
+                if (string.Equals(titulo.Nombre, nombre,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return titulo;
+                }
+            }
+
+            return null;
+        }
+
+        static void BuscarPorTitulo(List<Titulo> catalogo, string nombre)
+        {
+            Titulo titulo = BuscarTitulo(catalogo, nombre);
+
+            if (titulo != null)
+            {
+                Console.WriteLine("\nLibro encontrado:");
+                MostrarInformacion(titulo);
+            }
+            else
+            {
+                Console.WriteLine("No se encontro el titulo: " + nombre);
+            }
+        }
+
+        // Crea una copia del catalogo ordenada por ISBN.
         static List<Titulo> CrearCatalogoOrdenadoPorISBN(
             List<Titulo> catalogo)
         {
             List<Titulo> copia = new List<Titulo>(catalogo);
 
-            // Ordenamiento por insercion usando ISBN.
             for (int i = 1; i < copia.Count; i++)
             {
                 Titulo actual = copia[i];
@@ -188,28 +260,25 @@ namespace BibliotecaEscolar
         // Busqueda binaria propia por ISBN.
         static void BuscarPorISBN(List<Titulo> catalogo, string isbn)
         {
-            List<Titulo> catalogoISBN =
-                CrearCatalogoOrdenadoPorISBN(catalogo);
+            List<Titulo> copia = CrearCatalogoOrdenadoPorISBN(catalogo);
 
             int inicio = 0;
-            int fin = catalogoISBN.Count - 1;
-            bool encontrado = false;
+            int fin = copia.Count - 1;
 
             while (inicio <= fin)
             {
                 int medio = inicio + (fin - inicio) / 2;
 
                 int comparacion = string.Compare(
-                    catalogoISBN[medio].ISBN,
+                    copia[medio].ISBN,
                     isbn,
                     StringComparison.Ordinal);
 
                 if (comparacion == 0)
                 {
-                    Console.WriteLine("\nISBN encontrado:");
-                    MostrarInformacion(catalogoISBN[medio]);
-                    encontrado = true;
-                    break;
+                    Console.WriteLine("\nLibro encontrado:");
+                    MostrarInformacion(copia[medio]);
+                    return;
                 }
                 else if (comparacion < 0)
                 {
@@ -221,25 +290,20 @@ namespace BibliotecaEscolar
                 }
             }
 
-            if (!encontrado)
-            {
-                Console.WriteLine("\nNo se encontro el ISBN: " + isbn);
-            }
+            Console.WriteLine("No se encontro el ISBN: " + isbn);
         }
 
-        // Muestra los datos del libro.
+        // Muestra la informacion de un titulo.
         static void MostrarInformacion(Titulo titulo)
         {
             Console.WriteLine("Titulo: " + titulo.Nombre);
             Console.WriteLine("ISBN: " + titulo.ISBN);
             Console.WriteLine("Total de ejemplares: " +
                 titulo.Ejemplares.Count);
-            Console.WriteLine("Ejemplares disponibles: " +
+            Console.WriteLine("Disponibles: " +
                 titulo.ContarDisponibles());
             Console.WriteLine("Prestamos historicos: " +
                 titulo.PrestamosHistoricos);
         }
     }
 }
-
-
